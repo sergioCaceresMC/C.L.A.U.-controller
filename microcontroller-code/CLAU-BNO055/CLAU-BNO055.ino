@@ -3,16 +3,16 @@
 #include <Adafruit_BNO055.h>
 #include <BluetoothSerial.h>
 
-//=============================== Pines y variables ============================================
+//================ Pines y variables ====================
 
-#define I2C_SDA 21                //Pin de transmisión de información
-#define I2C_SCL 22                //Pin de sincronización con el reloj
-#define BTN1 16                   //Pin para dedo índice
-#define BTN2 4                    //Pin para dedo corazón
-#define LED 17                    //Led de comprobación de conexión bluetooth
-#define NAME "Clau-v1"            //Nombre de dispositivo que aparece en la conexión bluetooth
+#define I2C_SDA 21      // Pin de transmisión de información
+#define I2C_SCL 22      // Pin de sincronización con el reloj
+#define BTN1 16         // Pin para dedo índice
+#define BTN2 4          // Pin para dedo corazón
+#define LED 17          // Led de comprobación de conexión bluetooth
+#define NAME "Clau-v1"  // Nombre de dispositivo
 
-//====================================== Conexiones ============================================
+//==================== Conexiones =======================
 
 BluetoothSerial SerialBt;
 TwoWire I2CBNO = TwoWire(0);
@@ -43,6 +43,19 @@ void setup(){
   Serial.print(" Gyro: "); Serial.print(gyro);
   Serial.print(" Accel: "); Serial.print(accel);
   Serial.print(" Mag: "); Serial.println(mag);
+  /*
+  while(SerialBt.available() == 0){
+    char message = SerialBt.read();
+    if(message == '1'){
+      for(int i=0; i<5; i++){
+        digitalWrite(LED, LOW);
+        delay(50);
+        digitalWrite(LED, HIGH);
+        delay(50);
+      }
+      break;
+    }
+  }*/
 
   Serial.println("Iniciando...");
   delay(100);
@@ -54,9 +67,10 @@ void loop(){
 
   imu::Vector<3> acc = bno.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER); 
   imu::Vector<3> gyr = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);  
+  imu::Quaternion quat = bno.getQuat();
 
-  printSerialData(acc, gyr); //Para pruebas con conexión directa
-  printSerialBtData(acc, gyr); //Para pruebas en bluetooth
+  printSerialData(acc, gyr, quat); //Para pruebas con conexión directa
+  printSerialBtData(acc, gyr, quat); //Para pruebas en bluetooth
 
   //Comprobación de conexión Bluetooth
   if (SerialBt.connected()){
@@ -66,30 +80,32 @@ void loop(){
   }
 }
 
-void printSerialData(imu::Vector<3> acc, imu::Vector<3> gyr){
-  Serial.print(gyr.x(),4); 
-  Serial.print(", "); 
-  Serial.print(gyr.y(),4);
-  Serial.print(", "); 
-  Serial.print(gyr.z(),4);
-  Serial.print(", "); 
-  Serial.print(acc.x(), 4); 
-  Serial.print(", "); 
-  Serial.print(acc.y(),4); 
-  Serial.print(", "); 
-  Serial.println(acc.z(),4);
+void printSerialData(imu::Vector<3> acc, imu::Vector<3> gyr, imu::Quaternion q){
+  Serial.print(gyr.x(), 4); Serial.print(", "); 
+  Serial.print(gyr.y(), 4); Serial.print(", "); 
+  Serial.print(gyr.z(), 4); Serial.print(", "); 
+
+  Serial.print(acc.x(), 4); Serial.print(", "); 
+  Serial.print(acc.y(), 4); Serial.print(", "); 
+  Serial.print(acc.z(), 4); Serial.print(", ");
+
+  Serial.print(q.x(), 6); Serial.print(", ");
+  Serial.print(q.y(), 6); Serial.print(", ");
+  Serial.print(q.z(), 6); Serial.print(", ");
+  Serial.println(q.w(), 6);
 }
 
-void printSerialBtData(imu::Vector<3> acc, imu::Vector<3> gyr){
-  SerialBt.print(gyr.x(),4); 
-  SerialBt.print(", "); 
-  SerialBt.print(gyr.y(),4);
-  SerialBt.print(", "); 
-  SerialBt.print(gyr.z(),4);
-  SerialBt.print(", "); 
-  SerialBt.print(acc.x(), 4); 
-  SerialBt.print(", "); 
-  SerialBt.print(acc.y(),4); 
-  SerialBt.print(", "); 
-  SerialBt.println(acc.z(),4);
+void printSerialBtData(imu::Vector<3> acc, imu::Vector<3> gyr, imu::Quaternion q){
+  SerialBt.print(gyr.x(), 4); SerialBt.print(", "); 
+  SerialBt.print(gyr.y(), 4); SerialBt.print(", "); 
+  SerialBt.print(gyr.z(), 4); SerialBt.print(", "); 
+  
+  SerialBt.print(acc.x(), 4); SerialBt.print(", "); 
+  SerialBt.print(acc.y(), 4); SerialBt.print(", "); 
+  SerialBt.print(acc.z(), 4); SerialBt.print(", ");
+  
+  SerialBt.print(q.x(), 6); SerialBt.print(", ");
+  SerialBt.print(q.y(), 6); SerialBt.print(", ");
+  SerialBt.print(q.z(), 6); SerialBt.print(", ");
+  SerialBt.println(q.w(), 6);
 }

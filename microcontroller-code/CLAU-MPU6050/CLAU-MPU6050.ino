@@ -4,16 +4,17 @@
 #include <TFT_eSPI.h>
 #include <BluetoothSerial.h>
 
-//=============================== Pines y variables ============================================
+//================ Pines y variables ====================
 
-#define I2C_SDA 21                //Pin de transmisión de información
-#define I2C_SCL 22                //Pin de sincronización con el reloj
-#define BTN1 16                   //Pin para dedo índice
-#define BTN2 4                    //Pin para dedo corazón
-#define LED 17                    //Led de comprobación de conexión bluetooth
-#define NAME "Clau-v1"            //Nombre de dispositivo que aparece en la conexión bluetooth
+#define I2C_SDA 21      // Pin de transmisión de información
+#define I2C_SCL 22      // Pin de sincronización con el reloj
+#define BTN1 16         // Pin para dedo índice
+#define BTN2 4          // Pin para dedo corazón
+#define LED 17          // Led de comprobación de conexión bluetooth
+#define NAME "Clau-v1"  // Nombre de dispositivo
 
-//====================================== Conexiones ============================================
+//==================== Conexiones =======================
+
 
 BluetoothSerial SerialBt;
 TwoWire I2CMPU = TwoWire(0);
