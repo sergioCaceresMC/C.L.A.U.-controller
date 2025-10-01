@@ -12,6 +12,9 @@
 #define LED 17          // Led de comprobación de conexión bluetooth
 #define NAME "Clau-v1"  // Nombre de dispositivo
 
+imu::Quaternion q_ref(0, 0, 0, 1);  // identidad
+bool calibrated = false;
+
 //==================== Conexiones =======================
 
 BluetoothSerial SerialBt;
@@ -43,20 +46,7 @@ void setup(){
   Serial.print(" Gyro: "); Serial.print(gyro);
   Serial.print(" Accel: "); Serial.print(accel);
   Serial.print(" Mag: "); Serial.println(mag);
-  /*
-  while(SerialBt.available() == 0){
-    char message = SerialBt.read();
-    if(message == '1'){
-      for(int i=0; i<5; i++){
-        digitalWrite(LED, LOW);
-        delay(50);
-        digitalWrite(LED, HIGH);
-        delay(50);
-      }
-      break;
-    }
-  }*/
-
+  
   Serial.println("Iniciando...");
   delay(100);
 }
@@ -65,19 +55,36 @@ void loop(){
 
   delay(8); // sampling rate 100hz aprox
 
+  if(SerialBt.available() != 0){
+    char message = SerialBt.read();
+    if(message == '1'){
+      calibrated = false;
+      for(int i=0; i<5; i++){
+        digitalWrite(LED, LOW);
+        delay(50);
+        digitalWrite(LED, HIGH);
+        delay(50);
+      }
+    }
+  }
+
   imu::Vector<3> acc = bno.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER); 
   imu::Vector<3> gyr = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);  
   imu::Quaternion quat = bno.getQuat();
 
-  printSerialData(acc, gyr, quat); //Para pruebas con conexión directa
-  printSerialBtData(acc, gyr, quat); //Para pruebas en bluetooth
+  // Inicializamos con la primera lectura
+  if (!calibrated) {
+    recalibrate(quat);
+  }
+
+  // Calcular cuaternión corregido
+  imu::Quaternion q_corr = quatMultiply(quatConjugate(q_ref), quat);
+
+  printSerialData(acc, gyr, q_corr); //Para pruebas con conexión directa
+  printSerialBtData(acc, gyr, q_corr); //Para pruebas en bluetooth
 
   //Comprobación de conexión Bluetooth
-  if (SerialBt.connected()){
-    digitalWrite(LED, HIGH);
-  }else{
-    digitalWrite(LED, LOW);
-  }
+  digitalWrite(LED, SerialBt.connected() ? HIGH : LOW);
 }
 
 void printSerialData(imu::Vector<3> acc, imu::Vector<3> gyr, imu::Quaternion q){
@@ -109,3 +116,27 @@ void printSerialBtData(imu::Vector<3> acc, imu::Vector<3> gyr, imu::Quaternion q
   SerialBt.print(q.z(), 6); SerialBt.print(", ");
   SerialBt.println(q.w(), 6);
 }
+
+void recalibrate(imu::Quaternion q_now) {
+  // Guardar referencia
+  q_ref = q_now;
+
+  // Normalizar por seguridad
+  float norm = sqrt(q_ref.w()*q_ref.w() + q_ref.x()*q_ref.x() + q_ref.y()*q_ref.y() + q_ref.z()*q_ref.z());
+  q_ref = imu::Quaternion(q_ref.w()/norm, q_ref.x()/norm, q_ref.y()/norm, q_ref.z()/norm);
+  calibrated = true;
+}
+
+imu::Quaternion quatMultiply(const imu::Quaternion& q1, const imu::Quaternion& q2) {
+  return imu::Quaternion(
+    q1.w()*q2.w() - q1.x()*q2.x() - q1.y()*q2.y() - q1.z()*q2.z(),
+    q1.w()*q2.x() + q1.x()*q2.w() + q1.y()*q2.z() - q1.z()*q2.y(),
+    q1.w()*q2.y() - q1.x()*q2.z() + q1.y()*q2.w() + q1.z()*q2.x(),
+    q1.w()*q2.z() + q1.x()*q2.y() - q1.y()*q2.x() + q1.z()*q2.w()
+  );
+}
+
+imu::Quaternion quatConjugate(const imu::Quaternion& q) {
+  return imu::Quaternion(q.w(), -q.x(), -q.y(), -q.z());
+}
+

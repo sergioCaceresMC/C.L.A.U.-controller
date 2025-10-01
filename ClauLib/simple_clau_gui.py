@@ -8,7 +8,7 @@ from PyQt5 import QtWidgets
 import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 from scipy.spatial.transform import Rotation as R
-from clau import Clau
+from .clau import ClauBNO055
 
 
 class CubeViewer(QtWidgets.QWidget):
@@ -24,7 +24,7 @@ class CubeViewer(QtWidgets.QWidget):
 
         # Ejes de referencia
         axis = gl.GLAxisItem()
-        axis.setSize(2, 2, 2)
+        axis.setSize(3, 3, 3)
         self.view.addItem(axis)
 
         # Crear el cubo
@@ -46,7 +46,7 @@ class CubeViewer(QtWidgets.QWidget):
             [1,2,6], [1,6,5],  # derecha
             [0,3,7], [0,7,4],  # izquierda
         ])
-        colors = np.array([[1,0,0,1] for _ in range(len(faces))])  # rojo
+        colors = np.array([[0,1,1,1] for _ in range(len(faces))])  # rojo
 
         self.mesh = gl.GLMeshItem(vertexes=verts, faces=faces, faceColors=colors, smooth=False, drawEdges=True)
         self.view.addItem(self.mesh)
@@ -78,30 +78,30 @@ class CubeViewer(QtWidgets.QWidget):
         self.mesh.resetTransform()
         self.mesh.setTransform(pg.Transform3D(transform))
 
-
-if __name__ == '__main__':
+def cube_view(port="COM5", n_data=10, clk=115200, logs=True):
     app = QtWidgets.QApplication(sys.argv)
     win = CubeViewer()
     win.resize(600, 600)
     win.show()
+
     #Calibración y conexión con el clau
-    clau_obj = Clau(port="COM5",n_data=10)
+    clau_obj = ClauBNO055(port, n_data)
+    clau_obj.set_clk(clk)
     calibrate = clau_obj.calibrate()
     print("status:", calibrate["status"])
     
     from PyQt5.QtCore import QTimer
 
     def animate():
-        global clau_obj
         data = clau_obj.collect_data()
         if data is None:
             return  # esperar siguiente frame
 
-        pos = data["position"] #data["position"]
+        pos = [2,2,2] #data["position"]
         q = data["quaternion"]
 
-        print("cuat:", q)
-        win.set_transform([pos[0], pos[1],0], q)
+        if logs: print("cuat:", q)
+        win.set_transform(pos, q)
 
     timer = QTimer()
     timer.timeout.connect(animate)

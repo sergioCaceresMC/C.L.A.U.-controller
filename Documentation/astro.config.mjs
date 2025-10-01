@@ -16,17 +16,33 @@ export default defineConfig({
       ],
       sidebar: [
         {
-          label: "Guias",
+          label: "Introducción",
           items: [
             // Each item here is one entry in the navigation menu.
             {
-              label: "Ejemplo de implementación",
-              slug: "guias/ejemplo-de-implementacion",
+              label: "Instalación",
+              slug: "introduccion/instalacion",
+            },
+            {
+              label: "Primeros pasos",
+              slug: "introduccion/primeros-pasos",
+            },
+            {
+              label: "Configuración",
+              slug: "introduccion/configuracion",
+            },
+            {
+              label: "Novedades",
+              slug: "introduccion/novedades",
+            },
+            {
+              label: "Referencias",
+              slug: "introduccion/referencias",
             },
           ],
         },
         {
-          label: "Modelo físico",
+          label: "Microcontrolador",
           items: [
             // Each item here is one entry in the navigation menu.
             {
