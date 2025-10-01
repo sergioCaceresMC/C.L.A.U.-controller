@@ -11,7 +11,7 @@ pip install .\ClauLib\requirements.txt
 
 ## Ejemplo de visualización
 
-Dentro de esta librería encontraras el modulo _simple_clau_gui_ que contiene un visualizador sencillo de la rotación del controlador. Además de que te permite establecer en qué puerto, la velocidad del reloj serial, el número de datos que obtienes por línea y si deseas o no que te muestre los logs.
+Dentro de esta librería encontraras el modulo _simple_clau_gui_ que contiene un visualizador sencillo de la rotación del controlador. Además de que te permite establecer en qué puerto, la velocidad del reloj serial, el número de datos que obtienes por línea y si deseas o no que te muestre los logs. Si tienes dudas para determinar el puerto, puedes ver los **Primeros pasos** de la documentación.
 
 ```py
 from ClauLib.simple_clau_gui import cube_view
