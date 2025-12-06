@@ -13,11 +13,11 @@ En esta sección nos concentraremos únicamente en el uso de C.L.A.U.
 
 ## Objetos CLAU
 
-Dentro de la librería podemos encontrar el módulo _clau_ que contiene la clase _ClauBNO055_ que hace referencia al controlador C.L.A.U. que usa el sensor BNO055 que ofrece una mayor precisión y simplicidad en el procesamiento de datos.
+Dentro de la librería podemos encontrar el módulo _clau_ que contiene la clase _Clau_ que hace referencia al controlador C.L.A.U. que usa el sensor BNO055 que ofrece una mayor precisión y simplicidad en el procesamiento de datos.
 Con esta clase podemos definir multiples instancias Clau que permiten la comunicación con los diferentes controladores conectados por bluetooth.
 
 ```python
-from ClauLib.clau import ClauBNO055
+from ClauLib.clau import Clau
 ```
 
 Esta comunicación se realiza mediante _serial_ por lo que es necesario saber en qué puerto tenemos conectado el controlador deseado.
@@ -26,7 +26,7 @@ Para ello en el apartado de _Microcontrolador_ podemos encontrar la forma de def
 La forma más sencilla de definir un objeto Clau es indicando unicamente el valor de su puerto _COM_.
 
 ```python
-clau_obj = ClauBNO055(port="COM5")
+clau_obj = Clau(port="COM5")
 ```
 
 Este puerto es diferente en cada dispositivo y lo podemos encontras llendo a:
@@ -42,13 +42,13 @@ Aquí en el apartado de puertos podemos encontrar los puertos utilizados y qué 
 El ejemplo anterior era simplemente para comprobar la conexión y ver cómo podemos manipular la rotación de un cubo. Ahora vamos a usar 2 controladores C.L.A.U. para enviar señales a un programa que registra los datos en un archivo txt. Estos datos corresponden a los datos de orientación de la mano izquierda y la mano derecha.
 
 ```python
-from ClauLib.clau import ClauBNO055
+from ClauLib.clau import Clau
 
 if __name__ == "__main__":
 
     # Definición de objetos controlador
-    clau_left = ClauBNO055(port="COM5", n_data=10)
-    clau_right = ClauBNO055(port="COM5", n_data=10)
+    clau_left = Clau(port="COM5", n_data=10)
+    clau_right = Clau(port="COM5", n_data=10)
 
     send = ""
     nData = 1000
@@ -78,5 +78,3 @@ if __name__ == "__main__":
     print("Datos guardados correctamente")
     file1.close()
 ```
-
-- Read [about how-to guides](https://diataxis.fr/how-to-guides/) in the Diátaxis framework

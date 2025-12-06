@@ -10,4 +10,3 @@ pyqtgraph==0.13.7
 pyserial==3.5
 PyYAML==6.0.3
 scipy==1.16.2
-serial==0.0.97

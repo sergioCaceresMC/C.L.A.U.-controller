@@ -32,6 +32,10 @@ export default defineConfig({
               slug: "introduccion/configuracion",
             },
             {
+              label: "Recolección de datos",
+              slug: "introduccion/recoleccion_datos",
+            },
+            {
               label: "Novedades",
               slug: "introduccion/novedades",
             },
@@ -42,12 +46,30 @@ export default defineConfig({
           ],
         },
         {
+          label: "Sistema de ubicación",
+          items: [
+            // Each item here is one entry in the navigation menu.
+            {
+              label: "Detección en el espacio",
+              slug: "sistema-ubicacion/deteccion-en-el-espacio",
+            },
+          ],
+        },
+        {
           label: "Microcontrolador",
           items: [
             // Each item here is one entry in the navigation menu.
             {
+              label: "Circuito",
+              slug: "microcontrolador/circuito",
+            },
+            {
               label: "Cálculo de ángulos",
-              slug: "modelo-fisico/calculo-de-angulos",
+              slug: "microcontrolador/bno055",
+            },
+            {
+              label: "Cálculo de ángulos",
+              slug: "microcontrolador/mpu6050",
             },
           ],
         },

@@ -1,10 +1,10 @@
-from ClauLib.clau import ClauBNO055
+from ClauLib.clau import Clau
 
 if __name__ == "__main__":
 
     # Definición de objetos controlador
-    clau_left = ClauBNO055(port="COM5", n_data=10)
-    clau_right = ClauBNO055(port="COM5", n_data=10)
+    clau_left = Clau(port="COM5", n_data=10)
+    clau_right = Clau(port="COM5", n_data=10)
 
     send = ""
     nData = 1000

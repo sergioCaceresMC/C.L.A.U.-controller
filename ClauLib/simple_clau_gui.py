@@ -2,13 +2,14 @@
 # Librería para una visualización rápida del controlador CLAU
 #==============================================================
 
-import sys
+import sys, time
 import numpy as np 
 from PyQt5 import QtWidgets
+from PyQt5.QtCore import QTimer
 import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 from scipy.spatial.transform import Rotation as R
-from .clau import ClauBNO055
+from .clau import Clau
 
 
 class CubeViewer(QtWidgets.QWidget):
@@ -85,12 +86,10 @@ def cube_view(port="COM5", n_data=10, clk=115200, logs=True):
     win.show()
 
     #Calibración y conexión con el clau
-    clau_obj = ClauBNO055(port, n_data)
+    clau_obj = Clau(port, n_data)
     clau_obj.set_clk(clk)
     calibrate = clau_obj.calibrate()
     print("status:", calibrate["status"])
-    
-    from PyQt5.QtCore import QTimer
 
     def animate():
         data = clau_obj.collect_data()
@@ -103,6 +102,71 @@ def cube_view(port="COM5", n_data=10, clk=115200, logs=True):
         if logs: print("cuat:", q)
         win.set_transform(pos, q)
 
+    timer = QTimer()
+    timer.timeout.connect(animate)
+    timer.start(11)
+
+    sys.exit(app.exec_())
+
+    app = QtWidgets.QApplication(sys.argv)
+    win = CubeViewer()
+    win.resize(600, 600)
+    win.show()
+
+    # Calibración y conexión con el clau
+    clau_obj = ClauBNO055(port, n_data)
+    clau_obj.set_clk(clk)
+    clau_obj.set_shake_umbral(umbral)
+    calibrate = clau_obj.calibrate()
+    print("status:", calibrate["status"])
+
+    # Variables para animación suave
+    animation_active = False
+    animation_start = 0.0
+    animation_duration = 2.0  # segundos (ida y vuelta)
+    animation_direction = np.array([0.0, 0.0, 0.0])
+
+    def animate():
+        nonlocal animation_active, animation_start, animation_direction
+
+        data = clau_obj.collect_data()
+        if data is None:
+            return  # esperar siguiente frame
+
+        q = data["quaternion"]
+        shake = clau_obj.get_shake()
+        acc = np.array([0.0, 0.0, 0.0])
+
+        # Si se detecta agitación y no hay animación en curso
+        if shake["shakeStatus"] and not animation_active:
+            direction = np.array(shake["shakeDirection"], dtype=float)
+            mag = np.linalg.norm(direction)
+            if mag > 0:
+                direction /= mag  # normalizar dirección
+                animation_direction = direction
+                animation_start = time.time()
+                animation_active = True
+                if logs:
+                    print(f"Animación iniciada hacia: {direction}")
+
+        # Si hay animación activa
+        if animation_active:
+            elapsed = time.time() - animation_start
+            t = elapsed / animation_duration
+
+            if t >= 1.0:
+                # Termina la animación
+                animation_active = False
+                acc = np.array([0.0, 0.0, 0.0])
+            else:
+                # Movimiento suave de ida y vuelta (forma de media onda)
+                phase = np.sin(np.pi * t)
+                distance = 0.5  # escala de desplazamiento (ajustable)
+                acc = animation_direction * distance * phase
+
+        win.set_transform(acc, q)
+
+    # Timer de actualización (~90 FPS)
     timer = QTimer()
     timer.timeout.connect(animate)
     timer.start(11)

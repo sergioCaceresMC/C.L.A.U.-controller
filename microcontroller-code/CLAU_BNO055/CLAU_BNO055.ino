@@ -5,15 +5,17 @@
 
 //================ Pines y variables ====================
 
-#define I2C_SDA 21      // Pin de transmisión de información
-#define I2C_SCL 22      // Pin de sincronización con el reloj
-#define BTN1 16         // Pin para dedo índice
-#define BTN2 4          // Pin para dedo corazón
-#define LED 17          // Led de comprobación de conexión bluetooth
-#define NAME "Clau-v1"  // Nombre de dispositivo
+#define I2C_SDA 21      // Pin de transmisión de información 
+#define I2C_SCL 22      // Pin de sincronización con el reloj  
+#define BTN1 34         // Pin para dedo índice
+#define BTN2 5          // Pin para dedo corazón
+#define LED 2           // Led de comprobación de conexión bluetooth
+#define NAME "Clau-v2"  // Nombre de dispositivo
 
 imu::Quaternion q_ref(0, 0, 0, 1);  // identidad
 bool calibrated = false;
+int btn1 = 0;
+int btn2 = 0;
 
 //==================== Conexiones =======================
 
@@ -29,12 +31,15 @@ void setup(){
   I2CBNO.begin(I2C_SDA, I2C_SCL);
 
   pinMode(LED, OUTPUT);
-  
+
+  pinMode(BTN1, INPUT);
+  pinMode(BTN2, INPUT); 
+
   if (!bno.begin()){
     Serial.println("BNO055 no detectado");
-    while (1){
+    /*while (1){
       delay(10);
-    }
+    }*/
   }
   delay(100);   
 
@@ -57,6 +62,7 @@ void loop(){
 
   if(SerialBt.available() != 0){
     char message = SerialBt.read();
+    Serial.println(message);
     if(message == '1'){
       calibrated = false;
       for(int i=0; i<5; i++){
@@ -80,7 +86,7 @@ void loop(){
   // Calcular cuaternión corregido
   imu::Quaternion q_corr = quatMultiply(quatConjugate(q_ref), quat);
 
-  printSerialData(acc, gyr, q_corr); //Para pruebas con conexión directa
+  //printSerialData(acc, gyr, q_corr); //Para pruebas con conexión directa
   printSerialBtData(acc, gyr, q_corr); //Para pruebas en bluetooth
 
   //Comprobación de conexión Bluetooth
@@ -99,7 +105,12 @@ void printSerialData(imu::Vector<3> acc, imu::Vector<3> gyr, imu::Quaternion q){
   Serial.print(q.x(), 6); Serial.print(", ");
   Serial.print(q.y(), 6); Serial.print(", ");
   Serial.print(q.z(), 6); Serial.print(", ");
-  Serial.println(q.w(), 6);
+  Serial.print(q.w(), 6); Serial.print(", ");
+
+  btn1 = digitalRead(BTN1);
+  btn2 = digitalRead(BTN2);
+  Serial.print(btn1); Serial.print(", ");
+  Serial.println(btn2);
 }
 
 void printSerialBtData(imu::Vector<3> acc, imu::Vector<3> gyr, imu::Quaternion q){
@@ -114,7 +125,13 @@ void printSerialBtData(imu::Vector<3> acc, imu::Vector<3> gyr, imu::Quaternion q
   SerialBt.print(q.x(), 6); SerialBt.print(", ");
   SerialBt.print(q.y(), 6); SerialBt.print(", ");
   SerialBt.print(q.z(), 6); SerialBt.print(", ");
-  SerialBt.println(q.w(), 6);
+  SerialBt.print(q.w(), 6); SerialBt.print(", ");
+
+  btn1 = digitalRead(BTN1);
+  btn2 = digitalRead(BTN2);
+  SerialBt.print(btn1); SerialBt.print(", ");
+  SerialBt.println(btn2);
+
 }
 
 void recalibrate(imu::Quaternion q_now) {
@@ -139,4 +156,3 @@ imu::Quaternion quatMultiply(const imu::Quaternion& q1, const imu::Quaternion& q
 imu::Quaternion quatConjugate(const imu::Quaternion& q) {
   return imu::Quaternion(q.w(), -q.x(), -q.y(), -q.z());
 }
-
