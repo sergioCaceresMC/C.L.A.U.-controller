@@ -9,8 +9,8 @@
 //#define BTN1 34          // Pin para dedo índice
 //#define BTN2 5           // Pin para dedo corazón
 #define INTERRUPT_PIN 2    // pin de interrupción
-#define LED 13             // LED de actividad
-#define NAME "Clau-torax-v1"
+#define LED 16             // LED de actividad
+#define NAME "Clau-ceeibis-v1"
 
 MPU6050 mpu;
 BluetoothSerial SerialBt;
