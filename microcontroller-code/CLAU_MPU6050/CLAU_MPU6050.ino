@@ -10,7 +10,7 @@
 //#define BTN2 5           // Pin para dedo corazón
 #define INTERRUPT_PIN 2    // pin de interrupción
 #define LED 16             // LED de actividad
-#define NAME "Clau-ceeibis-v1"
+#define NAME "Clau-ceeibis-v3"
 
 MPU6050 mpu;
 BluetoothSerial SerialBt;

@@ -178,4 +178,48 @@ class Clau:
                 "shakeStatus": False
             }
 
+    # Joystick virtual
+    # ===============================================
+    # Convierte el cuaternión en joystick virtual
+    # Devuelve vector (x,y) en rango [-1,1]
+    # ===============================================
+    def get_virtual_joystick(self, max_angle_deg=30):
+        """
+        max_angle_deg: ángulo máximo que corresponde a 1.0
+        """
+
+        qx, qy, qz, qw = self.quaternion_wijk
+
+        # Normalizar por seguridad
+        norm = np.linalg.norm([qx, qy, qz, qw])
+        if norm == 0:
+            return np.array([0.0, 0.0])
+
+        qx, qy, qz, qw = qx/norm, qy/norm, qz/norm, qw/norm
+
+        # --- Convertir a Euler ---
+        # Roll (x axis rotation)
+        sinr_cosp = 2 * (qw * qx + qy * qz)
+        cosr_cosp = 1 - 2 * (qx * qx + qy * qy)
+        roll = np.arctan2(sinr_cosp, cosr_cosp)
+
+        # Pitch (y axis rotation)
+        sinp = 2 * (qw * qy - qz * qx)
+        sinp = np.clip(sinp, -1.0, 1.0)
+        pitch = np.arcsin(sinp)
+
+        # Convertir a grados
+        roll_deg = np.degrees(roll)
+        pitch_deg = np.degrees(pitch)
+
+        # --- Normalización tipo joystick ---
+        x = roll_deg / max_angle_deg
+        y = pitch_deg / max_angle_deg
+
+        # Saturar a [-1,1]
+        x = np.clip(x, -1.0, 1.0)
+        y = np.clip(y, -1.0, 1.0)
+
+        return np.array([x, y])
+
 
